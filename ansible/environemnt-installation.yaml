@@ -43,13 +43,23 @@
 - hosts: all
   become_user: root
   tasks:
+    - name: get if KubeVirt installation exists
+      shell: "kubectl get kubevirt -n kubevirt kubevirt"
+      register: result
+      ignore_errors: true
     - name: install latest KubeVirt
+      when: result.rc != 0
       environment:
         VERSION: v0.52.0
       shell: |
         kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/$VERSION/kubevirt-operator.yaml
         kubectl create -f https://github.com/kubevirt/kubevirt/releases/download/$VERSION/kubevirt-cr.yaml
+    - name: get if CDI installation exists
+      shell: "kubectl get cdi -n cdi cdi"
+      register: result
+      ignore_errors: true
     - name: install latest CDI 
+      when: result.rc != 0
       environment:
         VERSION: v1.47.0
       shell: |
